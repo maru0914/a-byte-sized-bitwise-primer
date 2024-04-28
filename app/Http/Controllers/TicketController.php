@@ -13,7 +13,9 @@ class TicketController extends Controller
     {
         $featuresToFilterTo = $request->collect('selectedFeatures');
 
-        $tickets = Ticket::all();
+        $tickets = Ticket::when($featuresToFilterTo->sum(), function ($query, $features) {
+            $query->whereRaw('(features & ?) = ?', [$features, $features]);
+        })->get();
 
         return Inertia::render('Tickets', [
             'tickets' => $tickets,
